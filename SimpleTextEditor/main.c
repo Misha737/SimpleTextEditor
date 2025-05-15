@@ -5,22 +5,44 @@
 
 #include "./array.h"
 
+char console_line[3];
+
+int read_console_all(){
+	memset(console_line, '\0', sizeof(console_line));
+	fgets(console_line, sizeof(console_line), stdin);
+	size_t end = strcspn(console_line, "\n");
+	console_line[end] = '\0';
+	//if (end == NULL) {
+	//	printf("Please enter text\n");
+	//	return 2;
+	//}
+	if (end >= sizeof(console_line) - 1) {
+		return 1;
+	}
+	return 0;
+}
+
+void read_console() {
+	int end = read_console_all();
+	if (end == 1) {
+		int ch;
+		while ((ch = getchar()) != '\n' && ch != EOF);
+	}
+}
+
 void parser() {
-	printf("\nChoose the command:\n");
+	printf("\nChoose the command: ");
 	char input = _getche();
 	switch (input)
 	{
 	case '1':
 		printf("\nEnter text to append: ");
-		char appended[100];
-		fgets(appended, 100, stdin);
-		size_t end = strcspn(appended, "\n");
-		if (end == NULL) {
-			printf("Please enter text\n");
-			return;
-		}
-		appended[end] = '\0';
-		insert(lines - 1, appended, strlen(buffer[lines - 1]));
+		int status;
+		while((status = read_console_all()) == 1)
+			insert(lines - 1, console_line, strlen(buffer[lines - 1]));
+		//if (status = 2)
+		//	return;
+		insert(lines - 1, console_line, strlen(buffer[lines - 1]));
 		printf("\n%s", buffer[0]);
 		break;
 	case '2':
@@ -28,7 +50,10 @@ void parser() {
 		new_line();
 		break;
 	case '3':
-		printf("3");
+		printf("\nEnter the file name for saving: ");
+		read_console();
+		if (fwrite_buffer(console_line) == 0)
+			printf("\nText has been saved successfully\n");
 		break;
 	case '4':
 		printf("4");

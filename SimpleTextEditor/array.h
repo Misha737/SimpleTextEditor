@@ -13,3 +13,7 @@ void new_line();
 void init_buffer();
 
 void print_buffer();
+
+int fwrite_buffer(const char* file_name);
+
+int fread_buffer();

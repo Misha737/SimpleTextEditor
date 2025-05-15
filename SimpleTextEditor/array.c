@@ -64,3 +64,20 @@ void print_buffer() {
 	}
 	printf("=========\n");
 }
+
+int fwrite_buffer(const char* file_name) {
+	FILE* file = fopen(file_name, "w");
+	if (file == NULL) {
+		printf("Couldn't create file for writing");
+		return 1;
+	}
+	for (int i = 0; i < lines; i++) {
+		fprintf(file, "%s\n", buffer[i]);
+	}
+	fclose(file);
+	return 0;
+}
+
+int fread_buffer() {
+
+}
