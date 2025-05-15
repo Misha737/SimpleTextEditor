@@ -3,30 +3,57 @@
 #include <stdio.h>
 #include <string.h>
 
-void insert(char** buffer, const char append[], size_t insert_pos) {
-	if (*buffer == NULL || append == NULL)
+char** buffer = NULL;
+size_t lines = 0;
+
+void insert(size_t line_index, const char append[], size_t insert_pos) {
+	if (lines <= line_index) {
+		printf("Line position is longer then number of lines");
+		exit(1);
+	}
+	char* buffer_line = buffer[line_index];
+	if (buffer_line == NULL || append == NULL)
 		exit(1);
 
-	size_t src_size = strlen(*buffer);
+	size_t src_size = strlen(buffer_line);
 	size_t append_size = strlen(append);
 	size_t full_size = src_size + append_size;
 
-	if (insert_pos >= src_size) {
+	if (insert_pos > src_size) {
 		printf("Insert position is longer then src length");
 		exit(1);
 	}
 
-	char* temp = (char*)realloc(*buffer, full_size + 1);
-	if (temp == NULL) {
+	buffer[line_index] = (char*)realloc(buffer_line, full_size + 1);
+	if (buffer[line_index] == NULL) {
 		printf("Error reallocation of memory\0");
 		exit(1);
 	}
-	*buffer = temp;
-	temp[full_size] = '\0';
+	buffer_line = buffer[line_index];
+	buffer_line[full_size] = '\0';
 
 	for (size_t i = full_size - 1; i >= append_size + insert_pos; i--) {
-		temp[i] = temp[i - append_size];
+		buffer_line[i] = buffer_line[i - append_size];
 	}
 
-	memcpy_s(temp + insert_pos, full_size, append, append_size);
+	memcpy_s(buffer_line + insert_pos, full_size, append, append_size);
 }
+
+void new_line() {
+	buffer[lines] = (char*)malloc(1);
+	if (buffer[lines] == NULL)
+		exit(1);
+	buffer[lines][0] = '\0';
+	lines++;
+}
+
+void init_buffer() {
+	lines = 0;
+	// TODO: if there is more than 50 lines
+	buffer = (char**)malloc(50 * sizeof(char**));
+	if (buffer == NULL)
+		exit(1);
+	new_line();
+}
+
+
