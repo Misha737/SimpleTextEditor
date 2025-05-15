@@ -34,7 +34,7 @@ void parser() {
 		printf("4");
 		break;
 	case '5':
-		printf("5");
+		print_buffer();
 		break;
 	case '6':
 		printf("6");

@@ -11,3 +11,5 @@ void insert(size_t line_index, const char append[], size_t insert_pos);
 void new_line();
 
 void init_buffer();
+
+void print_buffer();

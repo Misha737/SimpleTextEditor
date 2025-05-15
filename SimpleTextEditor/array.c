@@ -57,3 +57,10 @@ void init_buffer() {
 }
 
 
+void print_buffer() {
+	printf("\n=========\n");
+	for (int i = 0; i < lines; i++) {
+		printf("%s\n", buffer[i]);
+	}
+	printf("=========\n");
+}
