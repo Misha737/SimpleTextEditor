@@ -8,6 +8,10 @@ extern size_t lines;
 
 void insert(size_t line_index, const char append[], size_t insert_pos);
 
+void append(const char append[]);
+
+void clear_buffer();
+
 void new_line();
 
 void init_buffer();
@@ -16,4 +20,4 @@ void print_buffer();
 
 int fwrite_buffer(const char* file_name);
 
-int fread_buffer();
+int fread_buffer(const char* file_name);

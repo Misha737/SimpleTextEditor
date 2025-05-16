@@ -5,9 +5,9 @@
 
 #include "./array.h"
 
-char console_line[3];
+char console_line[256];
 
-int read_console_all(){
+int read_console_all() {
 	memset(console_line, '\0', sizeof(console_line));
 	fgets(console_line, sizeof(console_line), stdin);
 	size_t end = strcspn(console_line, "\n");
@@ -38,12 +38,11 @@ void parser() {
 	case '1':
 		printf("\nEnter text to append: ");
 		int status;
-		while((status = read_console_all()) == 1)
+		while ((status = read_console_all()) == 1)
 			insert(lines - 1, console_line, strlen(buffer[lines - 1]));
 		//if (status = 2)
 		//	return;
 		insert(lines - 1, console_line, strlen(buffer[lines - 1]));
-		printf("\n%s", buffer[0]);
 		break;
 	case '2':
 		printf("\nNew line is started");
@@ -56,7 +55,11 @@ void parser() {
 			printf("\nText has been saved successfully\n");
 		break;
 	case '4':
-		printf("4");
+		printf("\nEnter the file name for loading: ");
+		read_console();
+		if (fread_buffer(console_line) == 0) {
+			printf("\nText has been loaded successfully\n");
+		}
 		break;
 	case '5':
 		print_buffer();

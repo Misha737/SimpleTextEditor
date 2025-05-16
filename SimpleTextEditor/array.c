@@ -19,6 +19,10 @@ void insert(size_t line_index, const char append[], size_t insert_pos) {
 	size_t append_size = strlen(append);
 	size_t full_size = src_size + append_size;
 
+	if (append_size == 0) {
+		return;
+	}
+
 	if (insert_pos > src_size) {
 		printf("Insert position is longer then src length");
 		exit(1);
@@ -37,6 +41,14 @@ void insert(size_t line_index, const char append[], size_t insert_pos) {
 	}
 
 	memcpy_s(buffer_line + insert_pos, full_size, append, append_size);
+}
+
+void append(const char append[]) {
+	insert(lines - 1, append, strlen(buffer[lines - 1]));
+}
+
+void clear_buffer() {
+
 }
 
 void new_line() {
@@ -78,6 +90,22 @@ int fwrite_buffer(const char* file_name) {
 	return 0;
 }
 
-int fread_buffer() {
-
+int fread_buffer(const char* file_name) {
+	FILE* file = fopen(file_name, "r");
+	if (file == NULL) {
+		printf("Couldn't open the file for writing\n");
+		return 1;
+	}
+	char line[256];
+	int is_new_line = 0;
+	while (fgets(line, sizeof(line), file)) {
+		size_t end = strcspn(line, "\n");
+		if (end < sizeof(line) - 1 && line[end] == '\n') {
+			new_line();
+		}
+		line[end] = '\0';
+		append(line);
+	}
+	fclose(file);
+	return 0;
 }
