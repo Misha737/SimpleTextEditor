@@ -48,7 +48,11 @@ void append(const char append[]) {
 }
 
 void clear_buffer() {
-
+	for (int i = 0; i < lines; i++) {
+		free(buffer[i]);
+	}
+	lines = 0;
+	//new_line();
 }
 
 void new_line() {
@@ -63,8 +67,10 @@ void init_buffer() {
 	lines = 0;
 	// TODO: if there is more than 50 lines
 	buffer = (char**)malloc(50 * sizeof(char**));
-	if (buffer == NULL)
+	if (buffer == NULL) {
+		printf("Couldn't create a buffer");
 		exit(1);
+	}
 	new_line();
 }
 
@@ -96,6 +102,7 @@ int fread_buffer(const char* file_name) {
 		printf("Couldn't open the file for writing\n");
 		return 1;
 	}
+	clear_buffer();
 	char line[256];
 	int is_new_line = 0;
 	while (fgets(line, sizeof(line), file)) {
@@ -106,6 +113,7 @@ int fread_buffer(const char* file_name) {
 		line[end] = '\0';
 		append(line);
 	}
+
 	fclose(file);
 	return 0;
 }
