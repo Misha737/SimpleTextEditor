@@ -6,6 +6,7 @@
 #include <string.h>
 #include <conio.h>
 #include <stdio.h>
+#include "array.h"
 
 char console_line[256];
 
@@ -42,6 +43,7 @@ int read_integers(int* integers, size_t number_of_integers) {
 
 		start = end;
 	}
+	return 0;
 }
 
 void parser() {
@@ -52,9 +54,11 @@ void parser() {
 	case '1':
 		printf("\nEnter text to append: ");
 		int status;
-		while ((status = read_console_all()) == 1)
+		do
+		{
+			status = read_console_all();
 			append(console_line);
-		append(console_line);
+		} while (status == 1);
 		break;
 	case '2':
 		printf("\nNew line is started");
@@ -77,11 +81,31 @@ void parser() {
 		print_buffer();
 		break;
 	case '6':
-		printf("\nChoose line and index to insert: \n");
-		int integers[2];
-		int errors = read_integers(integers, sizeof(integers) / sizeof(int));
-		if (errors == 1) {
-			printf("\nEnter two integers\n");
+		printf("\nChoose line and index to insert: ");
+		while (1) {
+			int integers[2];
+			int errors = read_integers(integers, sizeof(integers) / sizeof(int));
+			if (errors == 1) {
+				printf("\nEnter two integers, for example \"1 2\"\n");
+				continue;
+			}
+			if (integers[0] > lines || integers[0] < 1) {
+				printf("\nEnter an index of line in range from 1 to %d\n", (int)lines);
+				continue;
+			}
+			size_t index_of_line = integers[0] - 1;
+			if (integers[1] - 1 > strlen(buffer[index_of_line]) || integers[1] < 1) {
+				printf("\nEnter an index of char in range from 1 to %d\n", (int)strlen(buffer[index_of_line]));
+				continue;
+			}
+			printf("Enter a text to insert: ");
+			int status_reading;
+			do
+			{
+				status_reading = read_console_all();
+				insert(integers[0] - 1, console_line, integers[1] - 1);
+			} while (status_reading == 1);
+			break;
 		}
 		break;
 	case '7':
