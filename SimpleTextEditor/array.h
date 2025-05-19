@@ -27,4 +27,4 @@ int fwrite_buffer(const char* file_name);
 
 int fread_buffer(const char* file_name);
 
-Point search_buffer(const char* str);
+Point search_buffer(const char* str, size_t start_line, size_t start_index);

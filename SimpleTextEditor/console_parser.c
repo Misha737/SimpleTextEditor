@@ -49,6 +49,9 @@ int read_integers(int* integers, size_t number_of_integers) {
 void parser() {
 	printf("\nChoose the command: ");
 	char input = _getche();
+	printf("\033[2J\033[H");
+	//system("cls");
+	printf("\nChoose the command: %c", input);
 	switch (input)
 	{
 	case '1':
@@ -61,7 +64,7 @@ void parser() {
 		} while (status == 1);
 		break;
 	case '2':
-		printf("\nNew line is started");
+		printf("\nNew line is started\n");
 		new_line();
 		break;
 	case '3':
@@ -95,7 +98,7 @@ void parser() {
 			}
 			size_t index_of_line = integers[0] - 1;
 			if (integers[1] - 1 > strlen(buffer[index_of_line]) || integers[1] < 1) {
-				printf("\nEnter an index of char in range from 1 to %d\n", (int)strlen(buffer[index_of_line]));
+				printf("\nEnter an index of char in range from 1 to %d\n", (int)strlen(buffer[index_of_line]) + 1);
 				continue;
 			}
 			printf("Enter a text to insert: ");
@@ -110,19 +113,24 @@ void parser() {
 		break;
 	case '7':
 		printf("\nEnter text to search: ");
+		size_t found_counter = 0;
 		read_console();
-		Point point = search_buffer(console_line);
-		if (point.line == -1) {
-			if (point.index == 0)
-			{
-				printf("Nothing found\n");
-			}
-			else if (point.index == 1) {
-				printf("Enter some text to search\n");
-			}
+		Point point = search_buffer(console_line, 0, 0);
+		if (point.line == -1 && point.index == 1) {
+			printf("Enter some text to search\n");
 			break;
 		}
-		printf("Text is present in this position: %d %d\n", point.line + 1, point.index + 1);
+
+		if (point.line == -1 && point.index == 0)
+			printf("Nothing found\n");
+		else
+			printf("Text is present in this position:\n");
+
+		while (!(point.line == -1 && point.index == 0)) {
+			found_counter++;
+			printf("%d) %d %d\n",(int)found_counter, point.line + 1, point.index + 1);
+			point = search_buffer(console_line, point.line, point.index + 1);
+		}
 		break;
 	case '8':
 		clear_buffer();

@@ -89,9 +89,10 @@ int fwrite_buffer(const char* file_name) {
 		printf("Couldn't create file for writing");
 		return 1;
 	}
-	for (int i = 0; i < lines; i++) {
+	for (int i = 0; i < lines - 1; i++) {
 		fprintf(file, "%s\n", buffer[i]);
 	}
+	fprintf(file, "%s", buffer[lines - 1]);
 	fclose(file);
 	return 0;
 }
@@ -119,7 +120,7 @@ int fread_buffer(const char* file_name) {
 	return 0;
 }
 
-Point search_buffer(const char* str) {
+Point search_buffer(const char* str, size_t start_line, size_t start_index) {
 	Point point;
 	size_t str_length = strlen(str);
 	if (str_length == 0) {
@@ -127,12 +128,12 @@ Point search_buffer(const char* str) {
 		point.index = 1;
 		return point;
 	}
-	for (int i_line = 0; i_line < lines; i_line++) {
+	for (int i_line = start_line; i_line < lines; i_line++) {
 		size_t line_length = strlen(buffer[i_line]);
-		point.line = i_line;
+		
 		if (line_length < str_length)
 			continue;
-		for (int i_index = 0; i_index < line_length - str_length + 1; i_index++) {
+		for (int i_index = start_index; i_index < line_length - str_length + 1; i_index++) {
 			point.index = i_index;
 			char* curr_line = buffer[i_line];
 			for (int i_str = 0; i_str < str_length; i_str++) {
@@ -140,10 +141,13 @@ Point search_buffer(const char* str) {
 					break;
 				}
 				if (i_str == str_length - 1) {
+					point.line = i_line;
+					point.index = i_index;
 					return point;
 				}
 			}
 		}
+		start_index = 0;
 	}
 	point.line = -1;
 	point.index = 0;
