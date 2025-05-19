@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 
+const size_t SIZE_SEGM = 64;
+size_t segments = 0;
+
 char** buffer = NULL;
 size_t lines = 0;
 
@@ -52,6 +55,7 @@ void clear_buffer() {
 		free(buffer[i]);
 	}
 	lines = 0;
+	segments = 0;
 	//new_line();
 }
 
@@ -61,16 +65,25 @@ void new_line() {
 		exit(1);
 	buffer[lines][0] = '\0';
 	lines++;
+	if (lines + 1 >= segments * SIZE_SEGM) {
+		segments++;
+		char** temp = (char**)realloc(buffer, segments * SIZE_SEGM * sizeof(char*));
+		if (temp == NULL) {
+			printf("Error reallocation of memory\0");
+			exit(1);
+		}
+		buffer = temp;
+	}
 }
 
 void init_buffer() {
 	lines = 0;
-	// TODO: if there is more than 50 lines
-	buffer = (char**)malloc(50 * sizeof(char**));
+	buffer = (char**)malloc(SIZE_SEGM * sizeof(char*));
 	if (buffer == NULL) {
 		printf("Couldn't create a buffer");
 		exit(1);
 	}
+	segments++;
 	new_line();
 }
 
