@@ -103,15 +103,16 @@ int fread_buffer(const char* file_name) {
 		return 1;
 	}
 	clear_buffer();
+	new_line();
 	char line[256];
-	int is_new_line = 0;
 	while (fgets(line, sizeof(line), file)) {
 		size_t end = strcspn(line, "\n");
-		if (end < sizeof(line) - 1 && line[end] == '\n') {
-			new_line();
-		}
+		int is_new_line = line[end] == '\n';
 		line[end] = '\0';
 		append(line);
+		if (end < sizeof(line) - 1 && is_new_line) {
+			new_line();
+		}
 	}
 
 	fclose(file);
