@@ -117,3 +117,34 @@ int fread_buffer(const char* file_name) {
 	fclose(file);
 	return 0;
 }
+
+Point search_buffer(const char* str) {
+	Point point;
+	size_t str_length = strlen(str);
+	if (str_length == 0) {
+		point.line = -1;
+		point.index = 1;
+		return point;
+	}
+	for (int i_line = 0; i_line < lines; i_line++) {
+		size_t line_length = strlen(buffer[i_line]);
+		point.line = i_line;
+		if (line_length < str_length)
+			continue;
+		for (int i_index = 0; i_index < line_length - str_length + 1; i_index++) {
+			point.index = i_index;
+			char* curr_line = buffer[i_line];
+			for (int i_str = 0; i_str < str_length; i_str++) {
+				if (curr_line[i_index + i_str] != str[i_str]) {
+					break;
+				}
+				if (i_str == str_length - 1) {
+					return point;
+				}
+			}
+		}
+	}
+	point.line = -1;
+	point.index = 0;
+	return point;
+}

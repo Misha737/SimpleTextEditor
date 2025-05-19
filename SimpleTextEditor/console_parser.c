@@ -109,7 +109,20 @@ void parser() {
 		}
 		break;
 	case '7':
-		printf("7");
+		printf("\nEnter text to search: ");
+		read_console();
+		Point point = search_buffer(console_line);
+		if (point.line == -1) {
+			if (point.index == 0)
+			{
+				printf("Nothing found\n");
+			}
+			else if (point.index == 1) {
+				printf("Enter some text to search\n");
+			}
+			break;
+		}
+		printf("Text is present in this position: %d %d\n", point.line + 1, point.index + 1);
 		break;
 	case '8':
 		clear_buffer();
