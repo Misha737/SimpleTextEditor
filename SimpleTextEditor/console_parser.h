@@ -1,6 +1,7 @@
 # pragma once
 
 #include "array.h"
+#include <functional>
 
 class Parser {
 private:
@@ -15,6 +16,10 @@ public:
 	void read_console();
 
 	int read_integers(int* integers, size_t number_of_integers);
+
+	Vector parse_vector();
+
+	Point parse_point();
 
 	void run();
 };

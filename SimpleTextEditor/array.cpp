@@ -2,6 +2,7 @@
 #include "./array.h"
 #include <stdio.h>
 #include <string.h>
+#include <windows.h>
 
 const size_t SIZE_SEGM = 64;
 size_t segments = 0;
@@ -174,9 +175,6 @@ Point Buffer::search_buffer(const char* str, size_t start_line, size_t start_ind
 
 void Buffer::delete_chars(Point point, size_t length) {
 	char* line = buffer[point.line];
-	size_t right_len = strlen(line) - point.index - 1;
-	if (length > right_len)
-		length = right_len + 1;
 
 	for (size_t i = point.index + length; i <= strlen(line); i++) {
 		line[i - length] = line[i];
@@ -187,4 +185,47 @@ void Buffer::delete_chars(Point point, size_t length) {
 		exit(1);
 	}
 	buffer[point.line] = temp;
+}
+
+void Buffer::copy(Vector vector) {
+	if (OpenClipboard(0))
+	{
+		EmptyClipboard();
+		// TODO: some problem
+		char* hBuff = (char*)GlobalAlloc(GMEM_FIXED, vector.length + 1);
+		if (hBuff == nullptr) {
+			return;
+		}
+
+		char* dest = (char*)GlobalLock(hBuff);
+		if (dest == nullptr) {
+			GlobalFree(hBuff);
+			return;
+		}
+		strncpy_s(dest, 2048, buffer[vector.point.line] + vector.point.index, vector.length + 1);
+		SetClipboardData(CF_TEXT, hBuff);
+		CloseClipboard();
+	}
+}
+
+int Buffer::paste(Point vector) {
+	if (!OpenClipboard(nullptr)) return -1;
+
+	HANDLE hData = GetClipboardData(CF_TEXT);
+	if (hData == nullptr) {
+		CloseClipboard();
+		return -1;
+	}
+
+	char* text = static_cast<char*>(GlobalLock(hData));
+	if (text == nullptr) {
+		CloseClipboard();
+		return -1;
+	}
+
+	insert(vector.line, text, vector.index);
+
+	GlobalUnlock(hData);
+	CloseClipboard();
+	return 0;
 }

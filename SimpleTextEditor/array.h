@@ -6,6 +6,11 @@ typedef struct {
 	size_t index;
 } Point;
 
+typedef struct {
+	Point point;
+	size_t length;
+} Vector;
+
 class Buffer {
 public:
 	char** buffer;
@@ -32,4 +37,8 @@ public:
 	Point search_buffer(const char* str, size_t start_line, size_t start_index);
 
 	void delete_chars(Point point, size_t length);
+	
+	void copy(Vector vector);
+	
+	int paste(Point vector);
 };
