@@ -8,6 +8,8 @@
 const size_t SIZE_SEGM = 64;
 size_t segments = 0;
 
+
+
 Buffer::Buffer() {
 	buffer = NULL;
 	lines = 0;
@@ -18,14 +20,16 @@ Buffer::Buffer() {
 	curr_buffer = 0;
 	history[curr_buffer].buffer = buffer;
 	history[curr_buffer].lines = lines;
+	point.line = 0;
+	point.index = 0;
 }
 
-void Buffer::insert(size_t line_index, const char append[], size_t insert_pos) {
-	if (lines <= line_index) {
+void Buffer::insert(const char append[]) {
+	if (lines <= point.line) {
 		printf("Line position is longer then number of lines");
 		exit(1);
 	}
-	char* buffer_line = buffer[line_index];
+	char* buffer_line = buffer[point.line];
 	if (buffer_line == NULL || append == NULL)
 		exit(1);
 
@@ -37,28 +41,32 @@ void Buffer::insert(size_t line_index, const char append[], size_t insert_pos) {
 		return;
 	}
 
-	if (insert_pos > src_size) {
+	if (point.index > src_size) {
 		printf("Insert position is longer then src length");
 		exit(1);
 	}
 
-	buffer[line_index] = (char*)realloc(buffer_line, full_size + 1);
-	if (buffer[line_index] == NULL) {
+	buffer[point.line] = (char*)realloc(buffer_line, full_size + 1);
+	if (buffer[point.line] == NULL) {
 		printf("Error reallocation of memory\0");
 		exit(1);
 	}
-	buffer_line = buffer[line_index];
+	buffer_line = buffer[point.line];
 	buffer_line[full_size] = '\0';
 
-	for (size_t i = full_size - 1; i >= append_size + insert_pos; i--) {
+	for (size_t i = full_size - 1; i >= append_size + point.index; i--) {
 		buffer_line[i] = buffer_line[i - append_size];
 	}
 
-	memcpy_s(buffer_line + insert_pos, full_size, append, append_size);
+	memcpy_s(buffer_line + point.index, full_size, append, append_size);
 }
 
 void Buffer::append(const char append[]) {
-	insert(lines - 1, append, strlen(buffer[lines - 1]));
+	Point temp_point = point;
+	point.line = lines - 1;
+	point.index = strlen(buffer[lines - 1]);
+	insert(append);
+	point = temp_point;
 }
 
 void Buffer::clear_buffer() {
@@ -67,6 +75,7 @@ void Buffer::clear_buffer() {
 	}
 	lines = 0;
 	segments = 0;
+	set_cursor_zero();
 	//new_line();
 }
 
@@ -180,7 +189,7 @@ Point Buffer::search_buffer(const char* str, size_t start_line, size_t start_ind
 	return point;
 }
 
-void Buffer::delete_chars(Point point, size_t length) {
+void Buffer::delete_chars(size_t length) {
 	char* line = buffer[point.line];
 
 	for (size_t i = point.index + length; i <= strlen(line); i++) {
@@ -192,14 +201,15 @@ void Buffer::delete_chars(Point point, size_t length) {
 		exit(1);
 	}
 	buffer[point.line] = temp;
+	set_cursor_zero();
 }
 
-void Buffer::copy(Vector vector) {
+void Buffer::copy(size_t length) {
 	if (OpenClipboard(0))
 	{
 		EmptyClipboard();
 		// TODO: some problem
-		char* hBuff = (char*)GlobalAlloc(GMEM_FIXED, vector.length + 1);
+		char* hBuff = (char*)GlobalAlloc(GMEM_FIXED,  length + 1);
 		if (hBuff == nullptr) {
 			return;
 		}
@@ -209,13 +219,13 @@ void Buffer::copy(Vector vector) {
 			GlobalFree(hBuff);
 			return;
 		}
-		strncpy_s(dest, 2048, buffer[vector.point.line] + vector.point.index, vector.length + 1);
+		strncpy_s(dest, 2048, buffer[point.line] + point.index, length + 1);
 		SetClipboardData(CF_TEXT, hBuff);
 		CloseClipboard();
 	}
 }
 
-int Buffer::paste(Point vector) {
+int Buffer::paste() {
 	if (!OpenClipboard(nullptr)) return -1;
 
 	HANDLE hData = GetClipboardData(CF_TEXT);
@@ -230,7 +240,7 @@ int Buffer::paste(Point vector) {
 		return -1;
 	}
 
-	insert(vector.line, text, vector.index);
+	insert(text);
 
 	GlobalUnlock(hData);
 	CloseClipboard();
@@ -298,4 +308,13 @@ void Buffer::update_history() {
 void Buffer::set_buffer_from_history() {
 	buffer = history[curr_buffer].buffer;
 	lines = history[curr_buffer].lines;
+}
+
+void Buffer::set_cursor(Point point) {
+	this->point = point;
+}
+
+void Buffer::set_cursor_zero() {
+	point.index = 0;
+	point.line = 0;
 }

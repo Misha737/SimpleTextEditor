@@ -30,9 +30,11 @@ public:
 	char** buffer;
 	size_t lines;
 
+	Point point;
+
 	Buffer();
 
-	void insert(size_t line_index, const char append[], size_t insert_pos);
+	void insert(const char append[]);
 
 	void append(const char append[]);
 
@@ -50,15 +52,19 @@ public:
 
 	Point search_buffer(const char* str, size_t start_line, size_t start_index);
 
-	void delete_chars(Point point, size_t length);
+	void delete_chars(size_t length);
 	
-	void copy(Vector vector);
+	void copy(size_t length);
 	
-	int paste(Point vector);
+	int paste();
 
 	void undo();
 
 	void redo();
 
 	void update_history();
+
+	void set_cursor(Point point);
+
+	void set_cursor_zero();
 };

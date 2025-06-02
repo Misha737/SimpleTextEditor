@@ -48,38 +48,26 @@ int Parser::read_integers(int* integers, size_t number_of_integers) {
 	return 0;
 }
 
-Vector Parser::parse_vector() {
-	printf("\nChoose line, index and number of symbols: ");
+size_t Parser::parse_length() {
+	printf("\nChoose number of symbols: ");
 	while (true) {
 		Vector vector;
-		int inputs[3];
-		int errors = read_integers(inputs, 3);
+		int inputs[1];
+		int errors = read_integers(inputs, 1);
 		if (errors == 1) {
-			printf("\nEnter 3 integers, for example \"1 2 5\"\n");
+			printf("\nEnter 1 integers, for example \"3\"\n");
 			continue;
 		}
-		Point point;
-		point.line = inputs[0] - 1;
-		point.index = inputs[1] - 1;
-		if (inputs[0] > buffer->lines || point.line < 0) {
-			printf("\nEnter an index of line in range from 1 to %d\n", (int)(buffer->lines));
-			continue;
-		}
-		if (strlen(buffer->buffer[point.line]) == 0) {
+
+		if (strlen(buffer->buffer[buffer->point.line]) == 0) {
 			printf("\nNothing do\n");
-			vector.length = 0;
-			return vector;
+			return 0;
 		}
-		if (inputs[1] > strlen(buffer->buffer[point.line]) || point.index < 0) {
-			printf("\nEnter an index of char in range from 1 to %d\n", (int)strlen(buffer->buffer[point.line]));
-			continue;
-		}
-		size_t right_len = strlen(buffer->buffer[point.line]) - point.index - 1;
-		if (inputs[2] > right_len)
-			inputs[2] = right_len + 1;
-		vector.point = point;
-		vector.length = inputs[2];
-		return vector;
+		size_t right_len = strlen(buffer->buffer[buffer->point.line]) - buffer->point.index - 1;
+		if (inputs[0] > right_len)
+			inputs[0] = right_len + 1;
+
+		return inputs[0];
 		break;
 	}
 }
@@ -99,7 +87,7 @@ Point Parser::parse_point() {
 			continue;
 		}
 		size_t index_of_line = integers[0] - 1;
-		if (integers[1] - 1 > strlen(buffer->buffer[index_of_line]) || integers[1] < 1) {
+		if (integers[1] > strlen(buffer->buffer[index_of_line]) + 1 || integers[1] < 1) {
 			printf("\nEnter an index of char in range from 1 to %d\n", (int)strlen(buffer->buffer[index_of_line]) + 1);
 			continue;
 		}
@@ -152,34 +140,17 @@ void Parser::run() {
 		buffer->print_buffer();
 		break;
 	case '6':
-		printf("\nChoose line and index to insert: ");
+	{
 		buffer->update_history();
-		while (1) {
-			int integers[2];
-			int errors = read_integers(integers, sizeof(integers) / sizeof(int));
-			if (errors == 1) {
-				printf("\nEnter two integers, for example \"1 2\"\n");
-				continue;
-			}
-			if (integers[0] > buffer->lines || integers[0] < 1) {
-				printf("\nEnter an index of line in range from 1 to %d\n", (int)(buffer->lines));
-				continue;
-			}
-			size_t index_of_line = integers[0] - 1;
-			if (integers[1] - 1 > strlen(buffer->buffer[index_of_line]) || integers[1] < 1) {
-				printf("\nEnter an index of char in range from 1 to %d\n", (int)strlen(buffer->buffer[index_of_line]) + 1);
-				continue;
-			}
-			printf("Enter a text to insert: ");
-			int status_reading;
-			do
-			{
-				status_reading = read_console_all();
-				buffer->insert(integers[0] - 1, console_line, integers[1] - 1);
-			} while (status_reading == 1);
-			break;
-		}
+		printf("\nEnter a text to insert: ");
+		int status_reading;
+		do
+		{
+			status_reading = read_console_all();
+			buffer->insert(console_line);
+		} while (status_reading == 1);
 		break;
+	}
 	case '7':
 	{
 		printf("\nEnter text to search: ");
@@ -206,45 +177,26 @@ void Parser::run() {
 	case '8':
 	{
 		buffer->update_history();
-		Vector vector = parse_vector();
-		if (vector.length != 0)
-			buffer->delete_chars(vector.point, vector.length);
+		size_t length = parse_length();
+		if (length != 0)
+			buffer->delete_chars(length);
 	}
 	break;
 	case 'r':
 	{
 		buffer->update_history();
-		printf("\n Choose line and index to replace: ");
-		while (true) {
-			int integers[2];
-			int errors = read_integers(integers, sizeof(integers) / sizeof(int));
-			if (errors == 1) {
-				printf("\nEnter two integers, for example \"1 2\"\n");
-				continue;
-			}
-			Point point;
-			point.line = integers[0] - 1;
-			point.index = integers[1] - 1;
-			if (integers[0] > buffer->lines || point.line < 0) {
-				printf("\nEnter an index of line in range from 1 to %d\n", (int)(buffer->lines));
-				continue;
-			}
-			if (point.index + 1 > strlen(buffer->buffer[point.line]) || point.index < 0) {
-				printf("\nEnter an index of char in range from 1 to %d\n", (int)strlen(buffer->buffer[point.index]) + 1);
-				continue;
-			}
-			printf("Enter a text to insert: ");
+
+			printf("\nEnter a text to insert: ");
 			int status_reading;
 			console_length = 0;
 			do
 			{
 				status_reading = read_console_all();
-				buffer->insert(integers[0] - 1, console_line, integers[1] - 1);
+				buffer->insert(console_line);
 			} while (status_reading == 1);
-			point.index += console_length;
-			buffer->delete_chars(point, console_length);
+			buffer->point.index += console_length;
+			buffer->delete_chars(console_length);
 			break;
-		}
 	}
 	break;
 	case 'd':
@@ -255,29 +207,29 @@ void Parser::run() {
 		break;
 	case 'c':
 	{
-		std::cout << "\nChoose line and index and number of symbols: ";
-
-		Vector vector = parse_vector();
-		buffer->copy(vector);
+		size_t length = parse_length();
+		if (length != 0)
+			buffer->copy(length);
 
 		break;
 	}
 	case 'x':
 	{
-		std::cout << "\nChoose line and index and number of symbols: ";
+		std::cout << "\nChoose number of symbols: ";
 		buffer->update_history();
 
-		Vector vector = parse_vector();
-		buffer->copy(vector);
-		buffer->delete_chars(vector.point, vector.length);
+		size_t length = parse_length();
+		if (length != 0) {
+			buffer->copy(length);
+			buffer->delete_chars(length);
+		}
 
 		break;
 	}
 	case 'p':
 	{
 		buffer->update_history();
-		Point point = parse_point();
-		if (buffer->paste(point) == -1) {
+		if (buffer->paste() == -1) {
 			std::cout << "\nText pasting failed\n";
 		}
 		break;
@@ -289,6 +241,9 @@ void Parser::run() {
 	case 'e':
 		std::cout << "\nRedo\n";
 		buffer->redo();
+		break;
+	case 's':
+		buffer->set_cursor(parse_point());
 		break;
 	default:
 		std::cout << "\nThe command is not implemented :(\n";

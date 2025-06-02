@@ -17,7 +17,7 @@ public:
 
 	int read_integers(int* integers, size_t number_of_integers);
 
-	Vector parse_vector();
+	size_t parse_length();
 
 	Point parse_point();
 
