@@ -1,6 +1,7 @@
 #pragma once
 #include "./array.h"
 #include <stdio.h>
+#include <iostream>
 #include <string.h>
 #include <windows.h>
 
@@ -11,6 +12,12 @@ Buffer::Buffer() {
 	buffer = NULL;
 	lines = 0;
 	init_buffer();
+	for (size_t i = 0; i < history_size; i++) {
+		history[i].lines = -1;
+	}
+	curr_buffer = 0;
+	history[curr_buffer].buffer = buffer;
+	history[curr_buffer].lines = lines;
 }
 
 void Buffer::insert(size_t line_index, const char append[], size_t insert_pos) {
@@ -95,7 +102,7 @@ void Buffer::init_buffer() {
 void Buffer::print_buffer() {
 	printf("\n=========\n");
 	for (int i = 0; i < lines; i++) {
-		printf("%s\n", buffer[i]);
+		std::cout << buffer[i] << std::endl;
 	}
 	printf("=========\n");
 }
@@ -228,4 +235,67 @@ int Buffer::paste(Point vector) {
 	GlobalUnlock(hData);
 	CloseClipboard();
 	return 0;
+}
+
+
+void Buffer::undo() {
+	if (curr_buffer > 0) {
+		curr_buffer--;
+		set_buffer_from_history();
+	}
+}
+
+void Buffer::redo() {
+	if (curr_buffer >= history_size - 1)
+		return;
+	if (history[curr_buffer + 1].lines == -1)
+		return;
+	curr_buffer++;
+	set_buffer_from_history();
+
+}
+
+void Buffer::delete_buffer(struct HistoryItem history_item) {
+	for (size_t i = 0; i < history_item.lines; i++) {
+		delete[] history_item.buffer[i];
+	}
+	delete[] history_item.buffer;
+}
+
+void Buffer::update_history() {
+	struct HistoryItem history_item;
+	history_item.lines = lines;
+	history_item.buffer = new char* [lines];
+	for (size_t i = 0; i < lines; i++) {
+		history_item.buffer[i] = new char[strlen(buffer[i]) + 1];
+		strcpy_s(history_item.buffer[i], strlen(buffer[i]) + 1, buffer[i]);
+	}
+	if (curr_buffer == history_size - 1) {
+		delete_buffer(history[0]);
+		history[0].lines = -1;
+		for (size_t i = 0; i < history_size - 1; i++) {
+			history[i] = history[i + 1];
+		}
+		history[history_size - 1] = history_item;
+
+	}
+	else if (history[curr_buffer + 1].lines != -1) {
+		for (size_t i = curr_buffer + 1; i < history_size; i++) {
+			if (history[i].lines == -1)
+				break;
+			delete_buffer(history[i]);
+			history[i].lines = -1;
+		}
+		curr_buffer++;
+		history[curr_buffer] = history_item;
+	}
+	else {
+		history[++curr_buffer] = history_item;
+	}
+	set_buffer_from_history();
+}
+
+void Buffer::set_buffer_from_history() {
+	buffer = history[curr_buffer].buffer;
+	lines = history[curr_buffer].lines;
 }

@@ -120,6 +120,7 @@ void Parser::run() {
 	case '1':
 	{
 		printf("\nEnter text to append: ");
+		buffer->update_history();
 		int status;
 		do
 		{
@@ -130,6 +131,7 @@ void Parser::run() {
 	break;
 	case '2':
 		printf("\nNew line is started\n");
+		buffer->update_history();
 		buffer->new_line();
 		break;
 	case '3':
@@ -140,6 +142,7 @@ void Parser::run() {
 		break;
 	case '4':
 		printf("\nEnter the file name for loading: ");
+		buffer->update_history();
 		read_console();
 		if (buffer->fread_buffer(console_line) == 0) {
 			printf("\nText has been loaded successfully\n");
@@ -150,6 +153,7 @@ void Parser::run() {
 		break;
 	case '6':
 		printf("\nChoose line and index to insert: ");
+		buffer->update_history();
 		while (1) {
 			int integers[2];
 			int errors = read_integers(integers, sizeof(integers) / sizeof(int));
@@ -201,6 +205,7 @@ void Parser::run() {
 	break;
 	case '8':
 	{
+		buffer->update_history();
 		Vector vector = parse_vector();
 		if (vector.length != 0)
 			buffer->delete_chars(vector.point, vector.length);
@@ -208,6 +213,7 @@ void Parser::run() {
 	break;
 	case 'r':
 	{
+		buffer->update_history();
 		printf("\n Choose line and index to replace: ");
 		while (true) {
 			int integers[2];
@@ -242,6 +248,7 @@ void Parser::run() {
 	}
 	break;
 	case 'd':
+		buffer->update_history();
 		buffer->clear_buffer();
 		buffer->new_line();
 		std::cout << "\nA buffer has been cleared\n";
@@ -258,6 +265,7 @@ void Parser::run() {
 	case 'x':
 	{
 		std::cout << "\nChoose line and index and number of symbols: ";
+		buffer->update_history();
 
 		Vector vector = parse_vector();
 		buffer->copy(vector);
@@ -267,12 +275,21 @@ void Parser::run() {
 	}
 	case 'p':
 	{
+		buffer->update_history();
 		Point point = parse_point();
 		if (buffer->paste(point) == -1) {
 			std::cout << "\nText pasting failed\n";
 		}
+		break;
 	}
-	break;
+	case 'u':
+		std::cout << "\nUndo\n";
+		buffer->undo();
+		break;
+	case 'e':
+		std::cout << "\nRedo\n";
+		buffer->redo();
+		break;
 	default:
 		std::cout << "\nThe command is not implemented :(\n";
 		break;

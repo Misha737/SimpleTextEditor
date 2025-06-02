@@ -1,6 +1,8 @@
 #pragma once
 #include <stdlib.h>
 
+const size_t history_size = 5;
+
 typedef struct {
 	size_t line;
 	size_t index;
@@ -11,7 +13,19 @@ typedef struct {
 	size_t length;
 } Vector;
 
+struct HistoryItem {
+	char** buffer;
+	size_t lines;
+};
+
 class Buffer {
+private:
+	HistoryItem history[history_size];
+	size_t curr_buffer = 0;
+
+	void delete_buffer(struct HistoryItem);
+
+	void set_buffer_from_history();
 public:
 	char** buffer;
 	size_t lines;
@@ -41,4 +55,10 @@ public:
 	void copy(Vector vector);
 	
 	int paste(Point vector);
+
+	void undo();
+
+	void redo();
+
+	void update_history();
 };
