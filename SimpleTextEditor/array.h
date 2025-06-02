@@ -1,30 +1,33 @@
 #pragma once
 #include <stdlib.h>
 
-//#define line buffer[lines - 1]
-
-extern char** buffer;
-extern size_t lines;
-
 typedef struct {
-	int line;
-	int index;
+	size_t line;
+	size_t index;
 } Point;
 
-void insert(size_t line_index, const char append[], size_t insert_pos);
+class Buffer {
+public:
+	char** buffer;
+	size_t lines;
 
-void append(const char append[]);
+	Buffer();
 
-void clear_buffer();
+	void insert(size_t line_index, const char append[], size_t insert_pos);
 
-void new_line();
+	void append(const char append[]);
 
-void init_buffer();
+	void clear_buffer();
 
-void print_buffer();
+	void new_line();
 
-int fwrite_buffer(const char* file_name);
+	void init_buffer();
 
-int fread_buffer(const char* file_name);
+	void print_buffer();
 
-Point search_buffer(const char* str, size_t start_line, size_t start_index);
+	int fwrite_buffer(const char* file_name);
+
+	int fread_buffer(const char* file_name);
+
+	Point search_buffer(const char* str, size_t start_line, size_t start_index);
+};

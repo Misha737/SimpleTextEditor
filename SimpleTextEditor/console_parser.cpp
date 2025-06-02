@@ -5,12 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <conio.h>
-#include <stdio.h>
-#include "array.h"
+#include <iostream>
 
-char console_line[256];
+Parser::Parser(Buffer* buffer) {
+	this->buffer = buffer;
+}
 
-int read_console_all() {
+int Parser::read_console_all() {
 	memset(console_line, '\0', sizeof(console_line));
 	fgets(console_line, sizeof(console_line), stdin);
 	size_t end = strcspn(console_line, "\n");
@@ -21,7 +22,7 @@ int read_console_all() {
 	return 0;
 }
 
-void read_console() {
+void Parser::read_console() {
 	int end = read_console_all();
 	if (end == 1) {
 		int ch;
@@ -29,7 +30,7 @@ void read_console() {
 	}
 }
 
-int read_integers(int* integers, size_t number_of_integers) {
+int Parser::read_integers(int* integers, size_t number_of_integers) {
 	read_console();
 	const char* start = console_line;
 	char* end;
@@ -46,7 +47,7 @@ int read_integers(int* integers, size_t number_of_integers) {
 	return 0;
 }
 
-void parser() {
+void Parser::run() {
 	printf("\nChoose the command: ");
 	char input = _getche();
 	printf("\033[2J\033[H");
@@ -55,33 +56,35 @@ void parser() {
 	switch (input)
 	{
 	case '1':
-		printf("\nEnter text to append: ");
-		int status;
-		do
-		{
-			status = read_console_all();
-			append(console_line);
-		} while (status == 1);
+	{
+			printf("\nEnter text to append: ");
+			int status;
+			do
+			{
+				status = read_console_all();
+				buffer->append(console_line);
+			} while (status == 1);
+	}
 		break;
 	case '2':
 		printf("\nNew line is started\n");
-		new_line();
+		buffer->new_line();
 		break;
 	case '3':
 		printf("\nEnter the file name for saving: ");
 		read_console();
-		if (fwrite_buffer(console_line) == 0)
+		if (buffer->fwrite_buffer(console_line) == 0)
 			printf("\nText has been saved successfully\n");
 		break;
 	case '4':
 		printf("\nEnter the file name for loading: ");
 		read_console();
-		if (fread_buffer(console_line) == 0) {
+		if (buffer->fread_buffer(console_line) == 0) {
 			printf("\nText has been loaded successfully\n");
 		}
 		break;
 	case '5':
-		print_buffer();
+		buffer->print_buffer();
 		break;
 	case '6':
 		printf("\nChoose line and index to insert: ");
@@ -92,13 +95,13 @@ void parser() {
 				printf("\nEnter two integers, for example \"1 2\"\n");
 				continue;
 			}
-			if (integers[0] > lines || integers[0] < 1) {
-				printf("\nEnter an index of line in range from 1 to %d\n", (int)lines);
+			if (integers[0] > buffer->lines || integers[0] < 1) {
+				printf("\nEnter an index of line in range from 1 to %d\n", (int)(buffer->lines));
 				continue;
 			}
 			size_t index_of_line = integers[0] - 1;
-			if (integers[1] - 1 > strlen(buffer[index_of_line]) || integers[1] < 1) {
-				printf("\nEnter an index of char in range from 1 to %d\n", (int)strlen(buffer[index_of_line]) + 1);
+			if (integers[1] - 1 > strlen(buffer->buffer[index_of_line]) || integers[1] < 1) {
+				printf("\nEnter an index of char in range from 1 to %d\n", (int)strlen(buffer->buffer[index_of_line]) + 1);
 				continue;
 			}
 			printf("Enter a text to insert: ");
@@ -106,16 +109,17 @@ void parser() {
 			do
 			{
 				status_reading = read_console_all();
-				insert(integers[0] - 1, console_line, integers[1] - 1);
+				buffer->insert(integers[0] - 1, console_line, integers[1] - 1);
 			} while (status_reading == 1);
 			break;
 		}
 		break;
 	case '7':
+	{
 		printf("\nEnter text to search: ");
 		size_t found_counter = 0;
 		read_console();
-		Point point = search_buffer(console_line, 0, 0);
+		Point point = buffer->search_buffer(console_line, 0, 0);
 		if (point.line == -1 && point.index == 1) {
 			printf("Enter some text to search\n");
 			break;
@@ -128,17 +132,18 @@ void parser() {
 
 		while (!(point.line == -1 && point.index == 0)) {
 			found_counter++;
-			printf("%d) %d %d\n",(int)found_counter, point.line + 1, point.index + 1);
-			point = search_buffer(console_line, point.line, point.index + 1);
+			printf("%d) %d %d\n", (int)found_counter, (int)point.line + 1, (int)point.index + 1);
+			point = buffer->search_buffer(console_line, point.line, point.index + 1);
 		}
+	}
 		break;
 	case '8':
-		clear_buffer();
-		new_line();
-		printf("\nA buffer has been cleared\n");
+		buffer->clear_buffer();
+		buffer->new_line();
+		std::cout << "\nA buffer has been cleared\n";
 		break;
 	default:
-		printf("\nThe command is not implemented :(\n");
+		std::cout << "\nThe command is not implemented :(\n";
 		break;
 	}
 }

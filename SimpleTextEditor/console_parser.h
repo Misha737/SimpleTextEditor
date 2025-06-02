@@ -1,11 +1,19 @@
 # pragma once
 
-extern char console_line[256];
+#include "array.h"
 
-int read_console_all();
+class Parser {
+private:
+	char console_line[256];
+	Buffer* buffer;
+public:
+	Parser(Buffer* buffer);
 
-void read_console();
+	int read_console_all();
 
-int read_integers(int* integers, size_t number_of_integers);
+	void read_console();
 
-void parser();
+	int read_integers(int* integers, size_t number_of_integers);
+
+	void run();
+};

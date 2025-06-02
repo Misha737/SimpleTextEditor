@@ -6,10 +6,13 @@
 const size_t SIZE_SEGM = 64;
 size_t segments = 0;
 
-char** buffer = NULL;
-size_t lines = 0;
+Buffer::Buffer(){
+	buffer = NULL;
+	lines = 0;
+	init_buffer();
+}
 
-void insert(size_t line_index, const char append[], size_t insert_pos) {
+void Buffer::insert(size_t line_index, const char append[], size_t insert_pos) {
 	if (lines <= line_index) {
 		printf("Line position is longer then number of lines");
 		exit(1);
@@ -46,11 +49,11 @@ void insert(size_t line_index, const char append[], size_t insert_pos) {
 	memcpy_s(buffer_line + insert_pos, full_size, append, append_size);
 }
 
-void append(const char append[]) {
+void Buffer::append(const char append[]) {
 	insert(lines - 1, append, strlen(buffer[lines - 1]));
 }
 
-void clear_buffer() {
+void Buffer::clear_buffer() {
 	for (int i = 0; i < lines; i++) {
 		free(buffer[i]);
 	}
@@ -59,7 +62,7 @@ void clear_buffer() {
 	//new_line();
 }
 
-void new_line() {
+void Buffer::new_line() {
 	buffer[lines] = (char*)malloc(1);
 	if (buffer[lines] == NULL)
 		exit(1);
@@ -76,7 +79,7 @@ void new_line() {
 	}
 }
 
-void init_buffer() {
+void Buffer::init_buffer() {
 	lines = 0;
 	buffer = (char**)malloc(SIZE_SEGM * sizeof(char*));
 	if (buffer == NULL) {
@@ -88,7 +91,7 @@ void init_buffer() {
 }
 
 
-void print_buffer() {
+void Buffer::print_buffer() {
 	printf("\n=========\n");
 	for (int i = 0; i < lines; i++) {
 		printf("%s\n", buffer[i]);
@@ -96,10 +99,11 @@ void print_buffer() {
 	printf("=========\n");
 }
 
-int fwrite_buffer(const char* file_name) {
-	FILE* file = fopen(file_name, "w");
-	if (file == NULL) {
-		printf("Couldn't create file for writing");
+int Buffer::fwrite_buffer(const char* file_name) {
+	FILE* file = NULL;
+	int error;
+	if ((error = fopen_s(&file, file_name, "w")) != 0) {
+		printf("Couldn't create file for writing. Code: %d", error);
 		return 1;
 	}
 	for (int i = 0; i < lines - 1; i++) {
@@ -110,10 +114,11 @@ int fwrite_buffer(const char* file_name) {
 	return 0;
 }
 
-int fread_buffer(const char* file_name) {
-	FILE* file = fopen(file_name, "r");
-	if (file == NULL) {
-		printf("Couldn't open the file for writing\n");
+int Buffer::fread_buffer(const char* file_name) {
+	FILE* file = NULL;
+	int error;
+	if ((error = fopen_s(&file, file_name, "r")) != 0) {
+		printf("Couldn't create file for writing. Code: %d", error);
 		return 1;
 	}
 	clear_buffer();
@@ -133,7 +138,7 @@ int fread_buffer(const char* file_name) {
 	return 0;
 }
 
-Point search_buffer(const char* str, size_t start_line, size_t start_index) {
+Point Buffer::search_buffer(const char* str, size_t start_line, size_t start_index) {
 	Point point;
 	size_t str_length = strlen(str);
 	if (str_length == 0) {
@@ -141,12 +146,12 @@ Point search_buffer(const char* str, size_t start_line, size_t start_index) {
 		point.index = 1;
 		return point;
 	}
-	for (int i_line = start_line; i_line < lines; i_line++) {
+	for (size_t i_line = start_line; i_line < lines; i_line++) {
 		size_t line_length = strlen(buffer[i_line]);
 		
 		if (line_length < str_length)
 			continue;
-		for (int i_index = start_index; i_index < line_length - str_length + 1; i_index++) {
+		for (size_t i_index = start_index; i_index < line_length - str_length + 1; i_index++) {
 			point.index = i_index;
 			char* curr_line = buffer[i_line];
 			for (int i_str = 0; i_str < str_length; i_str++) {
