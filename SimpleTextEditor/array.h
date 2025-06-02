@@ -30,4 +30,6 @@ public:
 	int fread_buffer(const char* file_name);
 
 	Point search_buffer(const char* str, size_t start_line, size_t start_index);
+
+	void delete_chars(Point point, size_t length);
 };

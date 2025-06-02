@@ -6,7 +6,7 @@
 const size_t SIZE_SEGM = 64;
 size_t segments = 0;
 
-Buffer::Buffer(){
+Buffer::Buffer() {
 	buffer = NULL;
 	lines = 0;
 	init_buffer();
@@ -148,7 +148,7 @@ Point Buffer::search_buffer(const char* str, size_t start_line, size_t start_ind
 	}
 	for (size_t i_line = start_line; i_line < lines; i_line++) {
 		size_t line_length = strlen(buffer[i_line]);
-		
+
 		if (line_length < str_length)
 			continue;
 		for (size_t i_index = start_index; i_index < line_length - str_length + 1; i_index++) {
@@ -170,4 +170,21 @@ Point Buffer::search_buffer(const char* str, size_t start_line, size_t start_ind
 	point.line = -1;
 	point.index = 0;
 	return point;
+}
+
+void Buffer::delete_chars(Point point, size_t length) {
+	char* line = buffer[point.line];
+	size_t right_len = strlen(line) - point.index - 1;
+	if (length > right_len)
+		length = right_len + 1;
+
+	for (size_t i = point.index + length; i <= strlen(line); i++) {
+		line[i - length] = line[i];
+	}
+	char* temp = (char*)realloc(line, strlen(line) + 1);
+	if (temp == nullptr) {
+		printf("Error reallocation of memory\0");
+		exit(1);
+	}
+	buffer[point.line] = temp;
 }

@@ -138,6 +138,30 @@ void Parser::run() {
 	}
 		break;
 	case '8':
+		printf("\nChoose line, index and number of symbols: ");
+		while (true) {
+			int inputs[3];
+			int errors = read_integers(inputs, 3);
+			if (errors == 1) {
+				printf("\nEnter 3 integers, for example \"1 2 5\"\n");
+				continue;
+			}
+			Point point;
+			point.line = inputs[0] - 1;
+			point.index = inputs[1] - 1;
+			if (inputs[0] > buffer->lines || point.line < 0) {
+				printf("\nEnter an index of line in range from 1 to %d\n", (int)(buffer->lines));
+				continue;
+			}
+			if (inputs[1] > strlen(buffer->buffer[point.line]) || inputs[1] < 1) {
+				printf("\nEnter an index of char in range from 1 to %d\n", (int)strlen(buffer->buffer[point.line]));
+				continue;
+			}
+			buffer->delete_chars(point, inputs[2]);
+			break;
+		}
+		break;
+	case 'd':
 		buffer->clear_buffer();
 		buffer->new_line();
 		std::cout << "\nA buffer has been cleared\n";
