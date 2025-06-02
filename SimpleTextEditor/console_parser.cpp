@@ -15,6 +15,7 @@ int Parser::read_console_all() {
 	memset(console_line, '\0', sizeof(console_line));
 	fgets(console_line, sizeof(console_line), stdin);
 	size_t end = strcspn(console_line, "\n");
+	console_length += end;
 	console_line[end] = '\0';
 	if (end >= sizeof(console_line) - 1) {
 		return 1;
@@ -153,13 +154,48 @@ void Parser::run() {
 				printf("\nEnter an index of line in range from 1 to %d\n", (int)(buffer->lines));
 				continue;
 			}
-			if (inputs[1] > strlen(buffer->buffer[point.line]) || inputs[1] < 1) {
+			if (inputs[1] > strlen(buffer->buffer[point.line]) || point.index < 0) {
 				printf("\nEnter an index of char in range from 1 to %d\n", (int)strlen(buffer->buffer[point.line]));
 				continue;
 			}
 			buffer->delete_chars(point, inputs[2]);
 			break;
 		}
+		break;
+	case 'r':
+	{
+		printf("\n Choose line and index to replace: ");
+		while (true) {
+			int integers[2];
+			int errors = read_integers(integers, sizeof(integers) / sizeof(int));
+			if (errors == 1) {
+				printf("\nEnter two integers, for example \"1 2\"\n");
+				continue;
+			}
+			Point point;
+			point.line = integers[0] - 1;
+			point.index = integers[1] - 1;
+			if (integers[0] > buffer->lines || point.line < 0) {
+				printf("\nEnter an index of line in range from 1 to %d\n", (int)(buffer->lines));
+				continue;
+			}
+			if (point.index + 1 > strlen(buffer->buffer[point.line]) || point.index < 0) {
+				printf("\nEnter an index of char in range from 1 to %d\n", (int)strlen(buffer->buffer[point.index]) + 1);
+				continue;
+			}
+			printf("Enter a text to insert: ");
+			int status_reading;
+			console_length = 0;
+			do
+			{
+				status_reading = read_console_all();
+				buffer->insert(integers[0] - 1, console_line, integers[1] - 1);
+			} while (status_reading == 1);
+			point.index += console_length;
+			buffer->delete_chars(point, console_length);
+			break;
+		}
+	}
 		break;
 	case 'd':
 		buffer->clear_buffer();
