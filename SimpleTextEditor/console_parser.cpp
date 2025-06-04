@@ -7,7 +7,7 @@
 #include <conio.h>
 #include <iostream>
 
-Parser::Parser(Buffer* buffer) {
+Parser::Parser(TextEditor* buffer) {
 	this->buffer = buffer;
 }
 
@@ -108,7 +108,7 @@ void Parser::run() {
 	case '1':
 	{
 		printf("\nEnter text to append: ");
-		buffer->update_history();
+		buffer->add_commit();
 		int status;
 		do
 		{
@@ -119,7 +119,7 @@ void Parser::run() {
 	break;
 	case '2':
 		printf("\nNew line is started\n");
-		buffer->update_history();
+		buffer->add_commit();
 		buffer->new_line();
 		break;
 	case '3':
@@ -130,7 +130,7 @@ void Parser::run() {
 		break;
 	case '4':
 		printf("\nEnter the file name for loading: ");
-		buffer->update_history();
+		buffer->add_commit();
 		read_console();
 		if (buffer->fread_buffer(console_line) == 0) {
 			printf("\nText has been loaded successfully\n");
@@ -141,7 +141,7 @@ void Parser::run() {
 		break;
 	case '6':
 	{
-		buffer->update_history();
+		buffer->add_commit();
 		printf("\nEnter a text to insert: ");
 		int status_reading;
 		do
@@ -176,7 +176,7 @@ void Parser::run() {
 	break;
 	case '8':
 	{
-		buffer->update_history();
+		buffer->add_commit();
 		size_t length = parse_length();
 		if (length != 0)
 			buffer->delete_chars(length);
@@ -184,7 +184,7 @@ void Parser::run() {
 	break;
 	case 'r':
 	{
-		buffer->update_history();
+		buffer->add_commit();
 
 			printf("\nEnter a text to insert: ");
 			int status_reading;
@@ -200,7 +200,7 @@ void Parser::run() {
 	}
 	break;
 	case 'd':
-		buffer->update_history();
+		buffer->add_commit();
 		buffer->clear_buffer();
 		buffer->new_line();
 		std::cout << "\nA buffer has been cleared\n";
@@ -216,7 +216,7 @@ void Parser::run() {
 	case 'x':
 	{
 		std::cout << "\nChoose number of symbols: ";
-		buffer->update_history();
+		buffer->add_commit();
 
 		size_t length = parse_length();
 		if (length != 0) {
@@ -228,7 +228,7 @@ void Parser::run() {
 	}
 	case 'p':
 	{
-		buffer->update_history();
+		buffer->add_commit();
 		if (buffer->paste() == -1) {
 			std::cout << "\nText pasting failed\n";
 		}

@@ -7,9 +7,9 @@ class Parser {
 private:
 	char console_line[256];
 	size_t console_length = 0;
-	Buffer* buffer;
+	TextEditor* buffer;
 public:
-	Parser(Buffer* buffer);
+	Parser(TextEditor* buffer);
 
 	int read_console_all();
 

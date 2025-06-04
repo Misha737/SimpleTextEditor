@@ -1,7 +1,8 @@
 #pragma once
 #include <stdlib.h>
+#include "commit.h"
 
-const size_t history_size = 5;
+const size_t history_size = 256;
 
 typedef struct {
 	size_t line;
@@ -13,26 +14,30 @@ typedef struct {
 	size_t length;
 } Vector;
 
-struct HistoryItem {
-	char** buffer;
-	size_t lines;
-};
+//struct HistoryItem {
+//	char** buffer;
+//	size_t lines;
+//};
 
-class Buffer {
+class TextEditor {
 private:
-	HistoryItem history[history_size];
-	size_t curr_buffer = 0;
+	//HistoryItem history[history_size];
+	//size_t curr_buffer = 0;
+
+	Commit* commits[history_size];
+	size_t head;
 
 	void delete_buffer(struct HistoryItem);
 
-	void set_buffer_from_history();
+	//void set_buffer_from_history();
 public:
 	char** buffer;
 	size_t lines;
 
 	Point point;
 
-	Buffer();
+	TextEditor();
+	~TextEditor();
 
 	void insert(const char append[]);
 
@@ -41,6 +46,8 @@ public:
 	void clear_buffer();
 
 	void new_line();
+
+	void delete_line();
 
 	void init_buffer();
 
@@ -62,7 +69,7 @@ public:
 
 	void redo();
 
-	void update_history();
+	void add_commit(Commit* new_commit);
 
 	void set_cursor(Point point);
 

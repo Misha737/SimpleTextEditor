@@ -10,21 +10,29 @@ size_t segments = 0;
 
 
 
-Buffer::Buffer() {
+TextEditor::TextEditor() {
 	buffer = NULL;
 	lines = 0;
 	init_buffer();
-	for (size_t i = 0; i < history_size; i++) {
-		history[i].lines = -1;
-	}
-	curr_buffer = 0;
-	history[curr_buffer].buffer = buffer;
-	history[curr_buffer].lines = lines;
+	head = 0;
+	//for (size_t i = 0; i < history_size; i++) {
+	//	history[i].lines = -1;
+	//}
+	//curr_buffer = 0;
+	//history[curr_buffer].buffer = buffer;
+	//history[curr_buffer].lines = lines;
 	point.line = 0;
 	point.index = 0;
 }
 
-void Buffer::insert(const char append[]) {
+TextEditor::~TextEditor() {
+	size_t i;
+	while (commits[i] != nullptr) {
+		delete commits[i];
+	}
+}
+
+void TextEditor::insert(const char append[]) {
 	if (lines <= point.line) {
 		printf("Line position is longer then number of lines");
 		exit(1);
@@ -61,7 +69,7 @@ void Buffer::insert(const char append[]) {
 	memcpy_s(buffer_line + point.index, full_size, append, append_size);
 }
 
-void Buffer::append(const char append[]) {
+void TextEditor::append(const char append[]) {
 	Point temp_point = point;
 	point.line = lines - 1;
 	point.index = strlen(buffer[lines - 1]);
@@ -69,7 +77,7 @@ void Buffer::append(const char append[]) {
 	point = temp_point;
 }
 
-void Buffer::clear_buffer() {
+void TextEditor::clear_buffer() {
 	for (int i = 0; i < lines; i++) {
 		free(buffer[i]);
 	}
@@ -79,7 +87,7 @@ void Buffer::clear_buffer() {
 	//new_line();
 }
 
-void Buffer::new_line() {
+void TextEditor::new_line() {
 	buffer[lines] = (char*)malloc(1);
 	if (buffer[lines] == NULL)
 		exit(1);
@@ -96,7 +104,14 @@ void Buffer::new_line() {
 	}
 }
 
-void Buffer::init_buffer() {
+void TextEditor::delete_line() {
+	delete[] buffer[lines - 1];
+	delete buffer[lines - 1];
+	buffer[lines] = nullptr;
+	lines--;
+}
+
+void TextEditor::init_buffer() {
 	lines = 0;
 	buffer = (char**)malloc(SIZE_SEGM * sizeof(char*));
 	if (buffer == NULL) {
@@ -108,7 +123,7 @@ void Buffer::init_buffer() {
 }
 
 
-void Buffer::print_buffer() {
+void TextEditor::print_buffer() {
 	printf("\n=========\n");
 	for (int i = 0; i < lines; i++) {
 		std::cout << buffer[i] << std::endl;
@@ -116,7 +131,7 @@ void Buffer::print_buffer() {
 	printf("=========\n");
 }
 
-int Buffer::fwrite_buffer(const char* file_name) {
+int TextEditor::fwrite_buffer(const char* file_name) {
 	FILE* file = NULL;
 	int error;
 	if ((error = fopen_s(&file, file_name, "w")) != 0) {
@@ -131,7 +146,7 @@ int Buffer::fwrite_buffer(const char* file_name) {
 	return 0;
 }
 
-int Buffer::fread_buffer(const char* file_name) {
+int TextEditor::fread_buffer(const char* file_name) {
 	FILE* file = NULL;
 	int error;
 	if ((error = fopen_s(&file, file_name, "r")) != 0) {
@@ -155,7 +170,7 @@ int Buffer::fread_buffer(const char* file_name) {
 	return 0;
 }
 
-Point Buffer::search_buffer(const char* str, size_t start_line, size_t start_index) {
+Point TextEditor::search_buffer(const char* str, size_t start_line, size_t start_index) {
 	Point point;
 	size_t str_length = strlen(str);
 	if (str_length == 0) {
@@ -189,7 +204,7 @@ Point Buffer::search_buffer(const char* str, size_t start_line, size_t start_ind
 	return point;
 }
 
-void Buffer::delete_chars(size_t length) {
+void TextEditor::delete_chars(size_t length) {
 	char* line = buffer[point.line];
 
 	for (size_t i = point.index + length; i <= strlen(line); i++) {
@@ -204,7 +219,7 @@ void Buffer::delete_chars(size_t length) {
 	set_cursor_zero();
 }
 
-void Buffer::copy(size_t length) {
+void TextEditor::copy(size_t length) {
 	if (OpenClipboard(0))
 	{
 		EmptyClipboard();
@@ -225,7 +240,7 @@ void Buffer::copy(size_t length) {
 	}
 }
 
-int Buffer::paste() {
+int TextEditor::paste() {
 	if (!OpenClipboard(nullptr)) return -1;
 
 	HANDLE hData = GetClipboardData(CF_TEXT);
@@ -248,14 +263,29 @@ int Buffer::paste() {
 }
 
 
-void Buffer::undo() {
-	if (curr_buffer > 0) {
+void TextEditor::undo() {
+	/*if (curr_buffer > 0) {
 		curr_buffer--;
 		set_buffer_from_history();
+	}*/
+
+	if (head <= 0)
+		return;
+
+	head--;
+	CommitChars* commit = commits[head];
+	if (commit->text == NULL) {
+
+	}
+	else {
+
+		set_cursor(commit->vector.point);
+		delete_chars(commit->vector.length);
+		insert(commit->text);
 	}
 }
 
-void Buffer::redo() {
+void TextEditor::redo() {
 	if (curr_buffer >= history_size - 1)
 		return;
 	if (history[curr_buffer + 1].lines == -1)
@@ -265,56 +295,84 @@ void Buffer::redo() {
 
 }
 
-void Buffer::delete_buffer(struct HistoryItem history_item) {
-	for (size_t i = 0; i < history_item.lines; i++) {
-		delete[] history_item.buffer[i];
-	}
-	delete[] history_item.buffer;
-}
+//void TextEditor::delete_buffer(struct HistoryItem history_item) {
+//	for (size_t i = 0; i < history_item.lines; i++) {
+//		delete[] history_item.buffer[i];
+//	}
+//	delete[] history_item.buffer;
+//}
 
-void Buffer::update_history() {
-	struct HistoryItem history_item;
-	history_item.lines = lines;
-	history_item.buffer = new char* [lines];
-	for (size_t i = 0; i < lines; i++) {
-		history_item.buffer[i] = new char[strlen(buffer[i]) + 1];
-		strcpy_s(history_item.buffer[i], strlen(buffer[i]) + 1, buffer[i]);
-	}
-	if (curr_buffer == history_size - 1) {
-		delete_buffer(history[0]);
-		history[0].lines = -1;
-		for (size_t i = 0; i < history_size - 1; i++) {
-			history[i] = history[i + 1];
-		}
-		history[history_size - 1] = history_item;
+void TextEditor::add_commit(Commit* new_commit) {
+	//CommitChars* new_commit = new CommitChars(text, vector);
 
+	if (new_commit == nullptr) {
+		std::cout << "[error] A fault of a commit creating" << std::endl;
+		exit(1);
 	}
-	else if (history[curr_buffer + 1].lines != -1) {
-		for (size_t i = curr_buffer + 1; i < history_size; i++) {
-			if (history[i].lines == -1)
-				break;
-			delete_buffer(history[i]);
-			history[i].lines = -1;
-		}
-		curr_buffer++;
-		history[curr_buffer] = history_item;
+
+	if (head < history_size - 1) {
+		head++;
 	}
 	else {
-		history[++curr_buffer] = history_item;
+		delete commits[0];
+		for (size_t i = 0; i < history_size - 1; i++) {
+			commits[i] = commits[i + 1];
+		}
+		commits[history_size] = nullptr;
 	}
-	set_buffer_from_history();
+
+	for (size_t i = head; i < history_size; i++) {
+		if (commits[head] == nullptr)
+			break;
+		delete commits[i];
+	}
+
+	commits[head] = new_commit;
 }
 
-void Buffer::set_buffer_from_history() {
-	buffer = history[curr_buffer].buffer;
-	lines = history[curr_buffer].lines;
-}
+//void TextEditor::add_commit() {
+//	struct HistoryItem history_item;
+//	history_item.lines = lines;
+//	history_item.buffer = new char* [lines];
+//	for (size_t i = 0; i < lines; i++) {
+//		history_item.buffer[i] = new char[strlen(buffer[i]) + 1];
+//		strcpy_s(history_item.buffer[i], strlen(buffer[i]) + 1, buffer[i]);
+//	}
+//	if (curr_buffer == history_size - 1) {
+//		delete_buffer(history[0]);
+//		history[0].lines = -1;
+//		for (size_t i = 0; i < history_size - 1; i++) {
+//			history[i] = history[i + 1];
+//		}
+//		history[history_size - 1] = history_item;
+//
+//	}
+//	else if (history[curr_buffer + 1].lines != -1) {
+//		for (size_t i = curr_buffer + 1; i < history_size; i++) {
+//			if (history[i].lines == -1)
+//				break;
+//			delete_buffer(history[i]);
+//			history[i].lines = -1;
+//		}
+//		curr_buffer++;
+//		history[curr_buffer] = history_item;
+//	}
+//	else {
+//		history[++curr_buffer] = history_item;
+//	}
+//	set_buffer_from_history();
+//}
 
-void Buffer::set_cursor(Point point) {
+//void TextEditor::set_buffer_from_history() {
+//	buffer = history[curr_buffer].buffer;
+//	lines = history[curr_buffer].lines;
+//}
+
+void TextEditor::set_cursor(Point point) {
 	this->point = point;
 }
 
-void Buffer::set_cursor_zero() {
+void TextEditor::set_cursor_zero() {
 	point.index = 0;
 	point.line = 0;
 }

@@ -2,7 +2,7 @@
 #include "console_parser.h"
 
 int main(int argc, char* argv[]) {
-	Buffer* buffer = new Buffer();
+	TextEditor* buffer = new TextEditor();
 	Parser* parser = new Parser(buffer);
 
 	while (1) {
