@@ -128,13 +128,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="array.cpp" />
+    <ClCompile Include="text_editor.cpp" />
+    <ClCompile Include="buffer.cpp" />
+    <ClCompile Include="commit.cpp" />
     <ClCompile Include="console_parser.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="array.h" />
+    <ClInclude Include="text_editor.h" />
+    <ClInclude Include="buffer.h" />
+    <ClInclude Include="commit.h" />
     <ClInclude Include="console_parser.h" />
+    <ClInclude Include="point.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,25 +1,27 @@
 # pragma once
 
-#include "array.h"
+#include "text_editor.h"
 #include <functional>
+#include "point.h"
+#include "buffer.h"
 
 class Parser {
 private:
 	char console_line[256];
 	size_t console_length = 0;
-	TextEditor* buffer;
+	TextEditor* text_editor;
 public:
-	Parser(TextEditor* buffer);
+	Parser(TextEditor* text_editor);
 
-	int read_console_all();
+	int readConsoleAll();
 
-	void read_console();
+	void readConsole();
 
-	int read_integers(int* integers, size_t number_of_integers);
+	int readIntegers(int* integers, size_t number_of_integers);
 
-	size_t parse_length();
+	size_t parseLength();
 
-	Point parse_point();
+	Point parsePoint();
 
 	void run();
 };

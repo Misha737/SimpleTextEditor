@@ -1,9 +1,9 @@
-#include "array.h"
+#include "text_editor.h"
 #include "console_parser.h"
 
 int main(int argc, char* argv[]) {
-	TextEditor* buffer = new TextEditor();
-	Parser* parser = new Parser(buffer);
+	TextEditor* text_editor = new TextEditor();
+	Parser* parser = new Parser(text_editor);
 
 	while (1) {
 		parser->run();
