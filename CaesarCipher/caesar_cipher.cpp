@@ -17,7 +17,7 @@ char* decrypt(char* encryptedText, int key)
     return encryptedText;
 }
 
-void algorithm(char* src, size_t key)
+void algorithm(char* src, int key)
 {
     for (size_t i = 0; i < strlen(src); i++) {
         char find[2];
@@ -37,8 +37,12 @@ void algorithm(char* src, size_t key)
     }
 }
 
-char arrayLoop(const char* src, size_t index)
+char arrayLoop(const char* src, int index)
 {
-    size_t src_len = strlen(src);
-    return src[index % src_len];
+    int src_len = strlen(src);
+    int src_index = index % src_len;
+    if (src_index < 0) {
+        return src[src_len + src_index];
+    }
+    return src[src_index];
 }

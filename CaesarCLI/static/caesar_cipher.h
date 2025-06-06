@@ -5,6 +5,6 @@ extern "C" {
 	__declspec(dllexport) char* decrypt(char* encryptedText, int key);
 };
 
-void algorithm(char* src, size_t key);
+void algorithm(char* src, int key);
 
-char arrayLoop(const char* src, size_t index);
+char arrayLoop(const char* src, int index);
