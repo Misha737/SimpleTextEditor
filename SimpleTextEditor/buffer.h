@@ -6,7 +6,7 @@ private:
 	const size_t SIZE_SEGM = 64;
 	size_t segments = 0;
 	char** content;
-	size_t lines;
+	size_t lines_size;
 public:
 	Buffer();
 	~Buffer();

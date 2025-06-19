@@ -8,14 +8,14 @@ Buffer::Buffer()
 
 Buffer::~Buffer()
 {
-	for (size_t i = 0; i < lines; i++) {
+	for (size_t i = 0; i < lines_size; i++) {
 		delete[] content[i];
 	}
 	delete[] content;
 }
 
 void Buffer::initBuffer() {
-	lines = 0;
+	lines_size = 0;
 	content = (char**)malloc(SIZE_SEGM * sizeof(char*));
 	if (content == NULL) {
 		printf("Couldn't create a buffer");
@@ -26,12 +26,12 @@ void Buffer::initBuffer() {
 }
 
 void Buffer::newLine() {
-	content[lines] = (char*)malloc(1);
-	if (content[lines] == NULL)
+	content[lines_size] = (char*)malloc(1);
+	if (content[lines_size] == NULL)
 		exit(1);
-	content[lines][0] = '\0';
-	lines++;
-	if (lines + 1 >= segments * SIZE_SEGM) {
+	content[lines_size][0] = '\0';
+	lines_size++;
+	if (lines_size + 1 >= segments * SIZE_SEGM) {
 		segments++;
 		char** temp = (char**)realloc(content, segments * SIZE_SEGM * sizeof(char*));
 		if (temp == NULL) {
@@ -43,35 +43,35 @@ void Buffer::newLine() {
 }
 
 void Buffer::deleteLine() {
-	delete[] content[lines - 1];
-	//delete text_editor[lines - 1];
-	content[lines - 1] = nullptr;
-	lines--;
+	delete[] content[lines_size - 1];
+	//delete text_editor[lines_size - 1];
+	content[lines_size - 1] = nullptr;
+	lines_size--;
 }
 
 size_t Buffer::getLines() const
 {
-	return lines;
+	return lines_size;
 }
 
 void Buffer::cleanBuffer()
 {
-	for (int i = 0; i < lines; i++) {
+	for (int i = 0; i < lines_size; i++) {
 		free(content[i]);
 	}
-	lines = 0;
+	lines_size = 0;
 	segments = 0;
 }
 
 Buffer* Buffer::copy() const
 {
-	char** new_content = new char* [lines];
+	char** new_content = new char* [lines_size];
 	if (new_content == nullptr) {
 		std::cout << "[Error] Failed to create a copy of a buffer" << std::endl;
 		exit(1);
 	}
 
-	for (size_t i = 0; i < lines; i++) {
+	for (size_t i = 0; i < lines_size; i++) {
 		size_t line_len = strlen(content[i]) + 1;
 		new_content[i] = new char[line_len];
 		if (new_content[i] == nullptr) {
@@ -83,13 +83,13 @@ Buffer* Buffer::copy() const
 
 	Buffer* new_buffer = new Buffer();
 	new_buffer->content = new_content;
-	new_buffer->lines = lines;
+	new_buffer->lines_size = lines_size;
 	return new_buffer;
 }
 
 char* Buffer::operator[](size_t index)
 {
-	if (index >= lines) {
+	if (index >= lines_size) {
 		throw std::out_of_range("Index is longer than number of lines");
 	}
 	return content[index];
@@ -97,7 +97,7 @@ char* Buffer::operator[](size_t index)
 
 const char* Buffer::operator[](size_t index) const
 {
-	if (index >= lines) {
+	if (index >= lines_size) {
 		throw std::out_of_range("Index is longer than number of lines");
 	}
 	return content[index];

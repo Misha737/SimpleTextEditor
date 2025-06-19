@@ -135,6 +135,8 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="array.h" />
+    <ClInclude Include="line.h" />
     <ClInclude Include="text_editor.h" />
     <ClInclude Include="buffer.h" />
     <ClInclude Include="commit.h" />
