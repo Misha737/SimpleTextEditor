@@ -7,93 +7,33 @@
 #include <conio.h>
 #include <iostream>
 
-Parser::Parser(TextEditor* text_editor) {
+Parser::Parser(TextEditor* text_editor) : tools(UITools(text_editor)) {
 	this->text_editor = text_editor;
-	for (size_t i = 0; i < sizeof(console_line) / sizeof(char); i++)
-		console_line[i] = '\n';
+	setUILine();
 }
 
-int Parser::readConsoleAll() {
-	memset(console_line, '\0', sizeof(console_line));
-	fgets(console_line, sizeof(console_line), stdin);
-	size_t end = strcspn(console_line, "\n");
-	console_length += end;
-	console_line[end] = '\0';
-	if (end >= sizeof(console_line) - 1) {
-		return 1;
+Parser::~Parser()
+{
+	if (ui_line != nullptr)
+		delete ui_line;
+}
+
+void Parser::setUILine()
+{
+	if (ui_line != nullptr)
+		delete ui_line;
+	Line* line = text_editor->buffer[text_editor->point.line];
+	if (PureLine* pure_line = dynamic_cast<PureLine*>(line)) {
+		ui_line = new UIPureLine(pure_line, tools);
 	}
-	return 0;
-}
-
-void Parser::readConsole() {
-	int end = readConsoleAll();
-	if (end == 1) {
-		int ch;
-		while ((ch = getchar()) != '\n' && ch != EOF);
+	else if (ContactLine* contact_line = dynamic_cast<ContactLine*>(line)) {
+		ui_line = new UIContactLine(contact_line, tools);
 	}
-}
-
-int Parser::readIntegers(int* integers, size_t number_of_integers) {
-	readConsole();
-	const char* start = console_line;
-	char* end;
-
-	for (int i = 0; i < number_of_integers; i++) {
-		long number = strtol(start, &end, 10);
-
-		if (errno == ERANGE || end == start)
-			return 1;
-		integers[i] = (int)number;
-
-		start = end;
+	else if (CheckListLine* check_list_line = dynamic_cast<CheckListLine*>(line)) {
+		ui_line = new UICheckListLine(check_list_line, tools);
 	}
-	return 0;
-}
-
-size_t Parser::parseLength() {
-	printf("\nChoose number of symbols: ");
-	while (true) {
-		int inputs[1];
-		int errors = readIntegers(inputs, 1);
-		if (errors == 1) {
-			printf("\nEnter 1 integers, for example \"3\"\n");
-			continue;
-		}
-		size_t line_len = text_editor->getLineLength(text_editor->point.line);
-		if (line_len == 0) {
-			printf("\nNothing do\n");
-			return 0;
-		}
-		size_t right_len = line_len - text_editor->point.index - 1;
-		if (inputs[0] > right_len)
-			return right_len + 1;
-
-		return inputs[0];
-		break;
-	}
-}
-
-Point Parser::parsePoint() {
-	printf("\nChoose line and index: ");
-	while (1) {
-		Point point;
-		int integers[2];
-		int errors = readIntegers(integers, sizeof(integers) / sizeof(int));
-		if (errors == 1) {
-			printf("\nEnter two integers, for example \"1 2\"\n");
-			continue;
-		}
-		point.line = integers[0] - 1;
-		point.index = integers[1] - 1;
-		if (point.line >= text_editor->buffer->getLines() || point.line < 0) {
-			printf("\nEnter an index of line in range from 1 to %d\n", (int)(text_editor->buffer->getLines()));
-			continue;
-		}
-		if (point.index > text_editor->getLineLength(point.line) || point.index < 0) {
-			printf("\nEnter an index of char in range from 1 to %d\n", (int)text_editor->getLineLength(point.line) + 1);
-			continue;
-		}
-		return point;
+	else {
+		throw std::exception("Line type doesn't exist");
 	}
 }
 
@@ -103,40 +43,48 @@ void Parser::run() {
 	printf("\033[2J\033[H");
 	//system("cls");
 	printf("\nChoose the command: %c", input);
+	std::cout << std::endl;
 	switch (input)
 	{
 	case '1':
 	{
-		printf("\nEnter text to append: ");
-		Point temp_point = text_editor->point;
-		text_editor->point.index = text_editor->getLineLength(temp_point.line);
-		int status;
-		console_length = 0;
-		do
-		{
-			status = readConsoleAll();
-			text_editor->append(console_line);
-		} while (status == 1);
-		const char* append = text_editor->getCharByLineCursor(text_editor->point.index);
-		text_editor->addCommit(new CommitChars(append, console_length, "", 0, text_editor->point));
-		text_editor->point = temp_point;
+		Text* text = ui_line->getTextFromField();
+		std::cout << "Enter a text to append: ";
+		tools.append_text(text);
+		break;
 	}
-	break;
-	case '2':
+	case '2': {
+		std::cout << "1 - Pure line" << std::endl;
+		std::cout << "2 - Contact line" << std::endl;
+		std::cout << "3 - Check list line" << std::endl;
+		switch (tools.readInteger())
+		{
+		case 1:
+			text_editor->newLine(new PureLine());
+			break;
+		case 2:
+			text_editor->newLine(new ContactLine());
+			break;
+		case 3:
+			text_editor->newLine(new CheckListLine());
+			break;
+		default:
+			break;
+		}
 		printf("\nNew line is started\n");
-		text_editor->newLine();
 		text_editor->addCommit(new CommitLine());
 		break;
+	}
 	case '3':
 		printf("\nEnter the file name for saving: ");
-		readConsole();
-		if (text_editor->fwriteBuffer(console_line) == 0)
+		tools.readConsole();
+		if (text_editor->fwriteBuffer(tools.console_line) == 0)
 			printf("\nText has been saved successfully\n");
 		break;
 	case '4':
 	{
-		printf("\nEnter the file name for loading: ");
-		readConsole();
+		/*printf("\nEnter the file name for loading: ");
+		tools.readConsole();
 		Buffer* old_buffer = text_editor->buffer->copy();
 		if (text_editor->freadBuffer(console_line) == 0) {
 			text_editor->addCommit(new CommitBuffer(text_editor->buffer, old_buffer));
@@ -146,30 +94,24 @@ void Parser::run() {
 			std::cout << "[Error] Couldn't load a file" << std::endl;
 		}
 		delete old_buffer;
-		break;
+		break;*/
 	}
 	case '5':
 		text_editor->printBuffer();
 		break;
 	case '6':
 	{
-		printf("\nEnter a text to insert: ");
-		int status_reading;
-		console_length = 0;
-		do
-		{
-			status_reading = readConsoleAll();
-			text_editor->insert(console_line);
-		} while (status_reading == 1);
-		text_editor->addCommit(new CommitChars(text_editor->getCharByCursor(), console_length, "", 0, text_editor->point));
+		Text* text = ui_line->getTextFromField();
+		std::cout << "Enter a text to insert: ";
+		tools.insert_text(text);
 		break;
 	}
 	case '7':
 	{
 		printf("\nEnter text to search: ");
 		size_t found_counter = 0;
-		readConsole();
-		Point point = text_editor->searchBuffer(console_line, 0, 0);
+		tools.readConsole();
+		Point point = text_editor->searchBuffer(tools.console_line, 0, 0);
 		if (point.line == -1 && point.index == 1) {
 			printf("Enter some text to search\n");
 			break;
@@ -183,50 +125,46 @@ void Parser::run() {
 		while (!(point.line == -1 && point.index == 0)) {
 			found_counter++;
 			printf("%d) %d %d\n", (int)found_counter, (int)point.line + 1, (int)point.index + 1);
-			point = text_editor->searchBuffer(console_line, point.line, point.index + 1);
+			point = text_editor->searchBuffer(tools.console_line, point.line, point.index + 1);
 		}
 		break;
 	}
 	case '8':
 	{
-		size_t length = parseLength();
-		if (length != 0) {
-			text_editor->addCommit(new CommitChars("", 0, text_editor->getCharByCursor(), length, text_editor->point));
-			text_editor->deleteChars(length);
-		}
+		//ui_line->deleteChars();
+		Text* text = ui_line->getTextFromField();
+		std::cout << "Enter length to delete" << std::endl;
+		size_t length = tools.parseLength(text);
+		if (length == 0)
+			return;
+
+		text->deleteRange(text_editor->point.index, length);
 		break;
 	}
 	case 'r':
 	{
-		printf("\nEnter a text to replace: ");
-		Point temp_point = text_editor->point;
-		int status_reading;
-		console_length = 0;
-		do
-		{
-			status_reading = readConsoleAll();
-			text_editor->insert(console_line);
-		} while (status_reading == 1);
-		const char* chars_after = text_editor->getCharByCursor();
-		text_editor->point.index += console_length;
-		const char* chars_before = text_editor->getCharByCursor();
-		text_editor->addCommit(new CommitChars(chars_after, console_length, chars_before, console_length, temp_point));
-		text_editor->deleteChars(console_length);
-		text_editor->point = temp_point;
+		Text* text = ui_line->getTextFromField();
+		std::cout << "Enter a text to replace: ";
+
+		tools.insert_text(text);
+		text->deleteRange(tools.text_editor->point.index + tools.console_length, tools.console_length);
+
 		break;
 	}
 	break;
 	case 'd':
-		text_editor->addCommit(new CommitBuffer(new Buffer(), text_editor->buffer));
+		//text_editor->addCommit(new CommitBuffer(new Buffer(), text_editor->buffer));
 		text_editor->cleanBuffer();
-		text_editor->newLine();
+		text_editor->newLine(new PureLine());
 		std::cout << "\nA buffer has been cleaned\n";
 		break;
 	case 'c':
 	{
-		size_t length = parseLength();
+		Text* text = ui_line->getTextFromField();
+		size_t length = tools.parseLength(text);
 		if (length != 0) {
-			text_editor->copy(length);
+			Text* line = ui_line->getTextFromField();
+			text_editor->copy(length, line);
 			std::cout << "A text has been copied" << std::endl;
 		}
 
@@ -234,11 +172,13 @@ void Parser::run() {
 	}
 	case 'x':
 	{
-		size_t length = parseLength();
+		Text* text = ui_line->getTextFromField();
+		size_t length = tools.parseLength(text);
 		if (length != 0) {
-			text_editor->addCommit(new CommitChars("", 0, text_editor->getCharByCursor(), length, text_editor->point));
-			text_editor->copy(length);
-			text_editor->deleteChars(length);
+			Text* line = ui_line->getTextFromField();
+			text_editor->addCommit(new CommitChars("", 0, line[text_editor->point.index].getArray(), length, text_editor->point));
+			text_editor->copy(length, line);
+			//text_editor->deleteChars(length);
 			std::cout << "A text has been cut" << std::endl;
 		}
 
@@ -246,11 +186,12 @@ void Parser::run() {
 	}
 	case 'p':
 	{
+		Text* line = ui_line->getTextFromField();
 		int length_pasted;
-		if (length_pasted = text_editor->paste() == -1) {
+		if (length_pasted = text_editor->paste(line) == -1) {
 			std::cout << "\nText pasting failed\n";
 		}
-		text_editor->addCommit(new CommitChars(text_editor->getCharByCursor(), length_pasted, "", 0, text_editor->point));
+		text_editor->addCommit(new CommitChars(&line->getArray()[text_editor->point.index], length_pasted, "", 0, text_editor->point));
 		std::cout << "\nA text has been pasted" << std::endl;
 
 		break;
@@ -274,7 +215,8 @@ void Parser::run() {
 		}
 		break;
 	case 's':
-		text_editor->setCursor(parsePoint());
+		text_editor->setCursor(tools.parsePoint());
+		setUILine();
 		break;
 	case 'h':
 		std::cout << "\nline: " << text_editor->point.line + 1 << std::endl;

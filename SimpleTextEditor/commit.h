@@ -1,6 +1,6 @@
 #pragma once
-#include "buffer.h"
 #include "point.h"
+#include "line.h"
 
 class Commit {
 public:
@@ -27,8 +27,8 @@ public:
 
 class CommitBuffer : public Commit {
 public:
-	Buffer* after;
-	Buffer* before;
-	CommitBuffer(const Buffer* after, const Buffer* before);
+	Array<Line*>* after;
+	Array<Line*>* before;
+	CommitBuffer(const Array<Line*>* after, const Array<Line*>* before);
 	~CommitBuffer() override;
 };

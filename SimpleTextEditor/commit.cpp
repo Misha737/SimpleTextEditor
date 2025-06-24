@@ -31,7 +31,7 @@ CommitChars::~CommitChars() {
 CommitLine::~CommitLine() {
 }
 
-CommitBuffer::CommitBuffer(const Buffer* after, const Buffer* before) {
+CommitBuffer::CommitBuffer(const Array<Line*>* after, const Array<Line*>* before) {
 	this->after = after->copy();
 	this->before = before->copy();
 }

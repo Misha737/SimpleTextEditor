@@ -3,25 +3,18 @@
 #include "text_editor.h"
 #include <functional>
 #include "point.h"
-#include "buffer.h"
+#include "ui_tools.h"
+#include "ui_line.h"
 
 class Parser {
 private:
-	char console_line[256];
-	size_t console_length = 0;
+	UITools tools;
 	TextEditor* text_editor;
+	UILine* ui_line;
 public:
 	Parser(TextEditor* text_editor);
+	~Parser();
 
-	int readConsoleAll();
-
-	void readConsole();
-
-	int readIntegers(int* integers, size_t number_of_integers);
-
-	size_t parseLength();
-
-	Point parsePoint();
-
+	void setUILine();
 	void run();
 };

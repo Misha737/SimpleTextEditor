@@ -21,21 +21,27 @@
     <ClCompile Include="console_parser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="buffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="commit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="text_editor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="line.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_line.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_tools.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="console_parser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="commit.h">
@@ -51,6 +57,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="array.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="text.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_line.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_tools.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
