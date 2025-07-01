@@ -1,7 +1,7 @@
 #include "commit.h"
 #include <string.h>
 
-void CommitChars::setData(const char* after, size_t after_len, const char* before, size_t before_len)
+void CommitChars::setData(const char* after, size_t after_len, const char* before, size_t before_len, size_t form)
 {
 	this->after = new char[after_len + 1];
 	this->after[after_len] = '\0';
@@ -10,11 +10,13 @@ void CommitChars::setData(const char* after, size_t after_len, const char* befor
 	this->before = new char[before_len + 1];
 	this->before[before_len] = '\0';
 	strncpy_s(this->before, before_len + 1, before, before_len);
+
+	this->form = form;
 }
 
-CommitChars::CommitChars(const char* after, size_t after_len, const char* before, size_t before_len, Point point) {
+CommitChars::CommitChars(const char* after, size_t after_len, const char* before, size_t before_len, Point point, size_t form) {
 	setCursor(point);
-	setData(after, after_len, before, before_len);
+	setData(after, after_len, before, before_len, form);
 }
 
 void CommitChars::setCursor(Point point) {
@@ -26,6 +28,11 @@ CommitChars::~CommitChars() {
 		delete[] after;
 	if (before != nullptr)
 		delete[] before;
+}
+
+CommitLine::CommitLine(const Line* new_line)
+{
+	this->line_type = new_line->copy();
 }
 
 CommitLine::~CommitLine() {

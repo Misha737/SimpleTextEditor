@@ -128,22 +128,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="caesar_cipher.cpp" />
     <ClCompile Include="line.cpp" />
     <ClCompile Include="text.cpp" />
     <ClCompile Include="text_editor.cpp" />
     <ClCompile Include="commit.cpp" />
-    <ClCompile Include="console_parser.cpp" />
+    <ClCompile Include="ui.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ui_line.cpp" />
     <ClCompile Include="ui_tools.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="array.h" />
+    <ClInclude Include="caesar_cipher.h" />
     <ClInclude Include="line.h" />
     <ClInclude Include="text.h" />
     <ClInclude Include="text_editor.h" />
     <ClInclude Include="commit.h" />
-    <ClInclude Include="console_parser.h" />
+    <ClInclude Include="ui.h" />
     <ClInclude Include="point.h" />
     <ClInclude Include="ui_line.h" />
     <ClInclude Include="ui_tools.h" />

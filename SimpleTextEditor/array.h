@@ -23,6 +23,7 @@ public:
 	~Array();
 	void add(T new_item);
 	void insertRange(const Array<T>& range, size_t index);
+	void insertRange(const T* range, size_t range_len, size_t index);
 	void deleteRange(size_t index, size_t length);
 	T pop();
 	T& operator[](size_t index);
@@ -92,9 +93,9 @@ inline Array<T>::Array(const T* new_items, size_t new_length)
 template<typename T>
 inline Array<T>::~Array()
 {
-	if (std::is_pointer<T>::value) {
+	if constexpr (std::is_pointer<T>::value) {
 		for (size_t i = 0; i < number_of_items; i++) {
-			delete& items[i];
+			delete items[i];
 		}
 	}
 	delete[] items;
@@ -111,10 +112,7 @@ inline void Array<T>::add(T new_item)
 
 template<typename T>
 inline void Array<T>::insertRange(const Array<T>& range, size_t insert_index)
-{
-	size_t append_segments =
-		std::ceil((float)range.length() - (SEGMENT_SIZE * segments - number_of_items) / (float)SEGMENT_SIZE);
-	
+{	
 	size_t new_segment_size = std::ceil((float)(number_of_items + range.length()) / (float)SEGMENT_SIZE);
 	if (new_segment_size != segments)
 		resize(new_segment_size);
@@ -127,6 +125,22 @@ inline void Array<T>::insertRange(const Array<T>& range, size_t insert_index)
 		items[i + insert_index] = range[i];
 	}
 	number_of_items += range.length();
+}
+
+template<typename T>
+inline void Array<T>::insertRange(const T* range, size_t range_len, size_t insert_index)
+{
+	size_t new_segment_size = std::ceil((float)(number_of_items + range_len) / (float)SEGMENT_SIZE);
+	if (new_segment_size != segments)
+		resize(new_segment_size);
+
+	for (int i = number_of_items + range_len - 1; i >= (int)insert_index; i--) {
+		items[i] = items[i - range_len];
+	}
+	for (size_t i = 0; i < range_len; i++) {
+		items[i + insert_index] = range[i];
+	}
+	number_of_items += range_len;
 }
 
 template<typename T>
@@ -205,7 +219,7 @@ inline void Array<T>::clean()
 {
 	if (std::is_pointer<T>::value) {
 		for (size_t i = 0; i < number_of_items; i++) {
-			delete& items[i];
+			delete items[i];
 		}
 	}
 	resize(1);

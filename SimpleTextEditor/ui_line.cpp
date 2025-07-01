@@ -5,8 +5,10 @@ void UIPureLine::printFields()
 	std::cout << "1 - text" << std::endl;
 }
 
-Text* UIPureLine::getTextFromField()
+Text* UIPureLine::getTextFromField(size_t* out = nullptr)
 {
+	if (out != nullptr)
+		*out = 0;
 	return &line->text;
 }
 
@@ -17,14 +19,16 @@ void UIContactLine::printFields()
 	std::cout << "3 - email" << std::endl;
 }
 
-Text* UIContactLine::getTextFromField()
+Text* UIContactLine::getTextFromField(size_t* out = nullptr)
 {
 	std::cout << "1 - name" << std::endl;
 	std::cout << "2 - surname" << std::endl;
 	std::cout << "3 - email" << std::endl;
-	switch (tools->readInteger())
+	size_t input = tools->readInteger();
+	if (out != nullptr)
+		*out = input;
+	switch (input)
 	{
-
 	case 1:
 		return &line->name;
 	case 2:
@@ -44,7 +48,9 @@ void UICheckListLine::printFields()
 	std::cout << "2 - status" << std::endl;
 }
 
-Text* UICheckListLine::getTextFromField()
+Text* UICheckListLine::getTextFromField(size_t* out = nullptr)
 {
+	if (out != nullptr)
+		*out = 0;
 	return &line->info;
 }

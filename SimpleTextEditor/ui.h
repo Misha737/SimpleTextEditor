@@ -6,14 +6,14 @@
 #include "ui_tools.h"
 #include "ui_line.h"
 
-class Parser {
+class UI {
 private:
 	UITools tools;
 	TextEditor* text_editor;
 	UILine* ui_line;
 public:
-	Parser(TextEditor* text_editor);
-	~Parser();
+	UI(TextEditor* text_editor);
+	~UI();
 
 	void setUILine();
 	void run();

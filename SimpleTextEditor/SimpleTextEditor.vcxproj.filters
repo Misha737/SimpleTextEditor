@@ -18,7 +18,7 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="console_parser.cpp">
+    <ClCompile Include="ui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="commit.cpp">
@@ -39,9 +39,12 @@
     <ClCompile Include="ui_tools.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="caesar_cipher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="console_parser.h">
+    <ClInclude Include="ui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="commit.h">
@@ -66,6 +69,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_tools.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="caesar_cipher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -95,8 +95,8 @@ Point UITools::parsePoint() {
 		}
 		point.line = integers[0] - 1;
 		point.index = integers[1] - 1;
-		if (point.line >= text_editor->buffer.length() || point.line < 0) {
-			printf("\nEnter an index of line in range from 1 to %d\n", (int)(text_editor->buffer.length()));
+		if (point.line >= text_editor->buffer->length() || point.line < 0) {
+			printf("\nEnter an index of line in range from 1 to %d\n", (int)(text_editor->buffer->length()));
 			continue;
 		}
 		/*if (point.index > text_editor->getLineLength(point.line) || point.index < 0) {
@@ -125,5 +125,4 @@ void UITools::insert_text(Text* text)
 		text->insertRange(console_text, text_editor->point.index);
 	} while (status == 1);
 	const char* append = &(*text)[text_editor->point.index];
-	text_editor->addCommit(new CommitChars(append, console_length, "", 0, text_editor->point));
 }
